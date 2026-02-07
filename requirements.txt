@@ -1,0 +1,6 @@
+librosa 
+pandas 
+soundfile 
+pydub 
+yt-dlp
+youtube-transcript-api
