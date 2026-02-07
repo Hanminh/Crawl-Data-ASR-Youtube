@@ -1,5 +1,6 @@
 import subprocess
 
+### Chọn topic để tìm kiếm kênh YouTube
 CHANNEL_TOPIC = "học tiếng anh"
 
 def search_channels(query, limit=1):

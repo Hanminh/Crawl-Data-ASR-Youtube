@@ -5,10 +5,11 @@ import subprocess
 import json
 from tqdm import tqdm
 
-CHANNEL_URL = "https://www.youtube.com/@donnhuloi1/videos"
-DOWNLOAD_PATH = "./data/raw_audio"
-SEGMENT_DIR = "./data/segments"
-MANIFEST_PATH = "./data/manifest.jsonl"
+# CHANNEL_URL = "https://www.youtube.com/@donnhuloi1/videos"
+
+DOWNLOAD_PATH = "./data/raw_audio" ## nơi lưu audio + subtitle tải về, xóa đi sau khi xử lý segments
+SEGMENT_DIR = "./data/segments" ## nơi lưu các đoạn audio đã cắt
+MANIFEST_PATH = "./data/manifest.jsonl" ## nơi lưu manifest cuối cùng
 
 os.makedirs(SEGMENT_DIR, exist_ok=True)
 os.makedirs(DOWNLOAD_PATH, exist_ok=True)
