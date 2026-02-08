@@ -4,15 +4,32 @@ import glob
 import subprocess
 import json
 from tqdm import tqdm
+import argparse
 
 # CHANNEL_URL = "https://www.youtube.com/@donnhuloi1/videos"
 
-DOWNLOAD_PATH = "./data/raw_audio" ## nơi lưu audio + subtitle tải về, xóa đi sau khi xử lý segments
-SEGMENT_DIR = "./data/segments" ## nơi lưu các đoạn audio đã cắt
-MANIFEST_PATH = "./data/manifest.jsonl" ## nơi lưu manifest cuối cùng
+# DOWNLOAD_PATH = "./data/raw_audio" ## nơi lưu audio + subtitle tải về, xóa đi sau khi xử lý segments
+# SEGMENT_DIR = "./data/segments" ## nơi lưu các đoạn audio đã cắt
+# MANIFEST_PATH = "./data/manifest.jsonl" ## nơi lưu manifest cuối cùng
 
-os.makedirs(SEGMENT_DIR, exist_ok=True)
-os.makedirs(DOWNLOAD_PATH, exist_ok=True)
+def parse_args():
+    parser = argparse.ArgumentParser(description="YouTube ASR Dataset Creator")
+    
+    # Thiết lập các tham số dòng lệnh
+    parser.add_argument('--download_path', type=str, default="./data/raw_audio", 
+                        help='Nơi lưu audio và subtitle gốc tạm thời')
+    parser.add_argument('--segment_dir', type=str, default="./data/segments", 
+                        help='Nơi lưu các đoạn audio đã cắt nhỏ')
+    parser.add_argument('--manifest_path', type=str, default="./data/manifest.jsonl", 
+                        help='Đường dẫn file manifest cuối cùng')
+    parser.add_argument('--list_channels', type=str, default="List_channels.txt", 
+                        help='File chứa danh sách URL channels')
+    parser.add_argument('--test_mode', type= bool, default=False,
+                        help='Chế độ test (chỉ xử lý 1 video)')
+    parser.add_argument('--cookies_file', type=str, default=None,
+                        help='File chứa cookies để tải video có giới hạn')
+    return parser.parse_args()
+
 
 def get_video_id_from_channel(channel_url):
     # channel_url = "https://www.youtube.com/@donnhuloi1/videos"
@@ -25,7 +42,7 @@ def get_video_id_from_channel(channel_url):
     video_ids = result.stdout.strip().split("\n")
     return video_ids
 
-def download_video_assets(video_id, download_path):
+def download_video_assets(video_id, download_path, args=None):
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     os.makedirs(download_path, exist_ok=True)
 
@@ -50,9 +67,11 @@ def download_video_assets(video_id, download_path):
             '-ac', '1'        # mono
         ],
 
-        'quiet': True
+        'quiet': True,
+        # 'cookiesfrombrowser': ('chrome',)
     }
-
+    if args and args.cookies_file:
+        ydl_opts['cookiefile'] = args.cookies_file
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         info = ydl.extract_info(video_url, download=True)
         video_id = info['id']
@@ -166,7 +185,15 @@ def append_to_manifest(manifest_lines):
             f.write(json.dumps(line, ensure_ascii=False) + "\n")
 
 if __name__ == "__main__":
-    with open('List_channels.txt', 'r', encoding="utf-8") as f:
+    args = parse_args()
+    DOWNLOAD_PATH = args.download_path
+    SEGMENT_DIR = args.segment_dir
+    MANIFEST_PATH = args.manifest_path
+    
+    os.makedirs(DOWNLOAD_PATH, exist_ok=True)
+    os.makedirs(SEGMENT_DIR, exist_ok=True)
+    
+    with open(args.list_channels, 'r', encoding="utf-8") as f:
         for line in f:
             CHANNEL_URL = line.strip()
             print(f"Processing channel: {CHANNEL_URL}")   
@@ -200,6 +227,8 @@ if __name__ == "__main__":
                 #     os.remove(vtt_file)
 
                 print(f"Done video {video_id}, added {len(manifest_lines)} samples.")
-                break # REMOVE TO PROCESS ALL VIDEOS
-            break # REMOVE TO PROCESS ALL CHANNELS
+                if args.test_mode:
+                    break # REMOVE TO PROCESS ALL VIDEOS
+            if args.test_mode:
+                break # REMOVE TO PROCESS ALL CHANNELS
         
