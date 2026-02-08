@@ -24,8 +24,11 @@ def parse_args():
                         help='Đường dẫn file manifest cuối cùng')
     parser.add_argument('--list_channels', type=str, default="List_channels.txt", 
                         help='File chứa danh sách URL channels')
-    parser.add_argument('--test_mode', type= bool, default=False,
-                        help='Chế độ test (chỉ xử lý 1 video)')
+    parser.add_argument(
+        '--test_mode',
+        action='store_true',
+        help='Chế độ test (chỉ xử lý 1 video)'
+    )
     parser.add_argument('--cookies_file', type=str, default=None,
                         help='File chứa cookies để tải video có giới hạn')
     return parser.parse_args()
