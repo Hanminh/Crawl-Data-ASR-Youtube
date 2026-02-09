@@ -25,7 +25,7 @@ def parse_args():
     parser.add_argument('--list_channels', type=str, default="List_channels.txt", 
                         help='File chứa danh sách URL channels')
     parser.add_argument(
-        '--test_mode',
+        '--test_mode',  
         action='store_true',
         help='Chế độ test (chỉ xử lý 1 video)'
     )
@@ -205,9 +205,11 @@ if __name__ == "__main__":
 
             for video_id in video_ids:
                 print(f"Processing video ID: {video_id} in channel {CHANNEL_URL}")
-
-                audio_file, vtt_file = download_video_assets(video_id, DOWNLOAD_PATH)
-
+                try:
+                    audio_file, vtt_file = download_video_assets(video_id, DOWNLOAD_PATH)
+                except Exception as e:
+                    print(f"Error downloading video {video_id}: {e}")
+                    continue
                 if not vtt_file or not os.path.exists(vtt_file):
                     print("No subtitles, skip.")
                     continue
